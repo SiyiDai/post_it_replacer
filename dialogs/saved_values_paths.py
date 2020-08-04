@@ -1,5 +1,6 @@
 from PyQt5.QtGui import QColor
 
+
 class SavedValuesConstants:
     ORGANIZATION = "RWU - EI"
     APPLICATION = "Post-it Replacer"
@@ -11,6 +12,6 @@ class SavedValuesConstants:
         ORGINAL_VIDEO_PATH = "original video path"
 
     class SettingsColorPicker:
-        CUSTOMIZED_COLOR_POST_IT = QColor(204, 204, 204, 180)
-        CUSTOMIZED_COLOR_POST_IT_UPPER = QColor(124, 183, 124, 180)
-        CUSTOMIZED_COLOR_POST_IT_LOWER = QColor(187, 209, 255, 180)
+        CUSTOMIZED_COLOR_POST_IT = QColor(209, 181, 162)
+        CUSTOMIZED_COLOR_POST_IT_UPPER = QColor(189, 161, 144)
+        CUSTOMIZED_COLOR_POST_IT_LOWER = QColor(229, 201, 182)

@@ -1,19 +1,18 @@
-from PyQt5.QtCore import QTimer, Qt, QItemSelectionModel, pyqtSignal
-from PyQt5.QtGui import QPixmap, QPainter, QKeySequence
-from PyQt5.QtWidgets import QMainWindow, QGraphicsScene, QProgressDialog, QShortcut, QErrorMessage
+from PyQt5.QtCore import Qt, QItemSelectionModel
+from PyQt5.QtGui import QPixmap, QColor
+from PyQt5.QtWidgets import QMainWindow, QColorDialog
 import os
-import shutil
 import cv2
 import numpy as np
 from PIL import Image
 
 from ui_py.ui_mainwindow import Ui_MainWindow
 from dialogs.open_load_dialog import OpenLoadDialog
-# from dialogs.settings_color_picker_dialog import SettingsColorPickerDialog
-
+from dialogs.saved_values_paths import SavedValuesConstants
 from dialogs.loader import LoadingThread
 
 REPLACED_FILE_NAME = "savedImage.jpg"
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -29,32 +28,15 @@ class MainWindow(QMainWindow):
         self.ui.radioButton_video.toggled.connect(self.__refresh_ui)
         self.ui.actionLoader.triggered.connect(self.on_action_loader_triggered)
         self.ui.pushButton_replace.clicked.connect(self.show_replace_result)
-        self.ui.post_it_color_pushButton.clicked.connect(self.on_action_settings_color_picker_triggered)
+        self.ui.post_it_color_pushButton.clicked.connect(
+            self.on_action_settings_color_picker_triggered
+        )
 
         self.replace_image_path = None
         self.original_picture_path = None
         self.original_video_path = None
 
-    def __refresh_ui(self):
-        self.__refresh_replace_image(self.replace_image_path)
-        self.__refresh_original_picture(self.original_picture_path)
-        # self.__refresh_original_video(self.original_video_path)
-
-    def __refresh_replace_image(self, replace_image_path):
-        pix_map = QPixmap(replace_image_path)
-        self.ui.replace_image_label.setPixmap(pix_map)
-
-    def __refresh_original_picture(self, original_picture_path):
-        pix_map = QPixmap(original_picture_path)
-        self.ui.original_source_label.setPixmap(pix_map)        
-
-    def __refresh_original_video(self, original_video_path):
-        pix_map = QPixmap(original_video_path)
-        self.ui.original_source_label.setPixmap(pix_map)
-
-    def __refresh_replaced_result(self, replaced_result_path):
-        pix_map = QPixmap(replaced_result_path)
-        self.ui.replacement_result_label.setPixmap(pix_map)
+        self.__refresh_post_it_color_line_edit()
 
     def on_action_loader_triggered(self):
         dialog = OpenLoadDialog()
@@ -72,14 +54,23 @@ class MainWindow(QMainWindow):
         )
 
         self.load_labelled_sequence_thread.start()
+        self.__refresh_ui()
 
         # self.loading_progress_dialog = QProgressDialog("loading...", None, 0, 100, parent=self)
         # self.loading_progress_dialog.exec_()
 
+    @staticmethod
+    def post_it_color():
+        return SavedValuesConstants.SettingsColorPicker.CUSTOMIZED_COLOR_POST_IT
+
     def on_action_settings_color_picker_triggered(self):
-        dialog = SettingsColorPickerDialog()
-        if not dialog.exec_():
-            return
+        title = "Choose the color of post-it"
+        color = self.post_it_color()
+        color_pick = QColorDialog.getColor(
+            color, self, title, QColorDialog.ShowAlphaChannel
+        )
+        SavedValuesConstants.SettingsColorPicker.CUSTOMIZED_COLOR_POST_IT = color_pick
+        self.__refresh_post_it_color_line_edit()
 
     def show_replace_result(self):
         replace_img = Image.open(self.replace_image_path)
@@ -99,7 +90,7 @@ class MainWindow(QMainWindow):
             self.show_replace_camera_stream(replace_img)
 
         else:
-            print('Unexpected Value of Mode')
+            print("Unexpected Value of Mode")
 
         self.__refresh_replaced_result(result_path)
 
@@ -113,7 +104,6 @@ class MainWindow(QMainWindow):
         # cv2.imshow('mask', replace_result)
         cap.release()
 
-
     def show_replaced_video(self, video_path, replace_img):
         # Video, change the post-it part in video
         cap = cv2.VideoCapture(video_path)
@@ -122,16 +112,15 @@ class MainWindow(QMainWindow):
             if frame is not None:
                 replace_result = self.detect_and_replace(frame.copy(), replace_img)
 
-                cv2.imshow('original', frame)
-                cv2.imshow('mask', replace_result)
+                cv2.imshow("original", frame)
+                cv2.imshow("mask", replace_result)
 
                 # press 'ESC' to quit
-                if cv2.waitKey(100) & 0xff == 0x1B:
+                if cv2.waitKey(100) & 0xFF == 0x1B:
                     break
             else:
                 break
         cap.release()
-
 
     def show_replace_camera_stream(self, replace_img):
         # Camera, change the post-it part in the camera stream
@@ -140,18 +129,18 @@ class MainWindow(QMainWindow):
             ret, frame = cap.read()
             replace_result = self.detect_and_replace(frame.copy(), replace_img)
 
-            cv2.imshow('original', frame)
-            cv2.imshow('mask', replace_result)
+            cv2.imshow("original", frame)
+            cv2.imshow("mask", replace_result)
 
             # press 'ESC' to quit
-            if cv2.waitKey(100) & 0xff == 0x1B:
+            if cv2.waitKey(100) & 0xFF == 0x1B:
                 break
         cap.release()
 
     def detect_and_replace(self, frame, replace_img):
         # 视频中的黄色 ：
-        lower = np.array([141, 149, 164])
-        upper = np.array([175, 201, 228])
+        lower = np.array([189, 161, 142])
+        upper = np.array([229, 201, 184])
 
         # 黑色钱包颜色范围 ：
         # lower = np.array([25, 20, 22])
@@ -160,7 +149,9 @@ class MainWindow(QMainWindow):
         mask = cv2.inRange(frame, lowerb=lower, upperb=upper)
 
         # find contours
-        contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contours, hierarchy = cv2.findContours(
+            mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE
+        )
 
         try:
             # find biggest bounding box
@@ -176,10 +167,41 @@ class MainWindow(QMainWindow):
             # draw bounding box in captured image
             frame = cv2.rectangle(frame, rect[index][0], rect[index][1], (0, 0, 255), 2)
             temp_replace = np.array(replace_img.resize(rect[index][2]))
-            frame[rect[index][0][1]: rect[index][1][1], rect[index][0][0]:rect[index][1][0], :] = temp_replace
+            frame[
+                rect[index][0][1] : rect[index][1][1],
+                rect[index][0][0] : rect[index][1][0],
+                :,
+            ] = temp_replace
         except:
             pass
         return frame
+
+    def __refresh_ui(self):
+        self.__refresh_replace_image(self.replace_image_path)
+        self.__refresh_original_picture(self.original_picture_path)
+        # self.__refresh_original_video(self.original_video_path)
+
+    def __refresh_replace_image(self, replace_image_path):
+        pix_map = QPixmap(replace_image_path)
+        self.ui.replace_image_label.setPixmap(pix_map)
+
+    def __refresh_original_picture(self, original_picture_path):
+        pix_map = QPixmap(original_picture_path)
+        self.ui.original_source_label.setPixmap(pix_map)
+
+    def __refresh_original_video(self, original_video_path):
+        pix_map = QPixmap(original_video_path)
+        self.ui.original_source_label.setPixmap(pix_map)
+
+    def __refresh_replaced_result(self, replaced_result_path):
+        pix_map = QPixmap(replaced_result_path)
+        self.ui.replacement_result_label.setPixmap(pix_map)
+
+    def __refresh_post_it_color_line_edit(self):
+        self.ui.post_it_lineEdit.setStyleSheet(
+            "QLineEdit { background-color: %s}"
+            % SavedValuesConstants.SettingsColorPicker.CUSTOMIZED_COLOR_POST_IT.name()
+        )
 
 
 # if __name__ == '__main__':

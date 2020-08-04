@@ -16,31 +16,39 @@ class OpenLoadDialog(QDialog):
         self.ui = Ui_LoadDialog()
         self.ui.setupUi(self)
 
-        self.settings_loader = SettingsLoaderAndSaver(SavedValuesConstants.LoaderDialog.SETTING_NAME)
+        self.settings_loader = SettingsLoaderAndSaver(
+            SavedValuesConstants.LoaderDialog.SETTING_NAME
+        )
 
         self.__initialize_fields_and_values()
 
     def __initialize_fields_and_values(self):
 
         load_value_and_initialize_field(
-            self.settings_loader.read(SavedValuesConstants.LoaderDialog.REPLACE_IMAGE_PATH),
+            self.settings_loader.read(
+                SavedValuesConstants.LoaderDialog.REPLACE_IMAGE_PATH
+            ),
             self.ui.replace_image_line_edit,
             self.ui.select_replace_image_button.pressed,
             self.on_select_replace_image_button_down,
         )
         load_value_and_initialize_field(
-            self.settings_loader.read(SavedValuesConstants.LoaderDialog.ORIGINAL_PICTURE_PATH),
+            self.settings_loader.read(
+                SavedValuesConstants.LoaderDialog.ORIGINAL_PICTURE_PATH
+            ),
             self.ui.original_picture_line_edit,
             self.ui.select_original_picture_button.pressed,
             self.on_select_original_picture_button_down,
         )
         load_value_and_initialize_field(
-            self.settings_loader.read(SavedValuesConstants.LoaderDialog.ORGINAL_VIDEO_PATH),
+            self.settings_loader.read(
+                SavedValuesConstants.LoaderDialog.ORGINAL_VIDEO_PATH
+            ),
             self.ui.original_video_line_edit,
             self.ui.select_original_video_button.pressed,
             self.on_select_original_video_button_down,
         )
-       
+
     def on_select_replace_image_button_down(self):
         start_file_dialog(
             self,
@@ -50,7 +58,6 @@ class OpenLoadDialog(QDialog):
             "Image Files (*.png *.jpg *.bmp)",
             self.ui.replace_image_line_edit,
         )
-
 
     def on_select_original_picture_button_down(self):
         start_file_dialog(
@@ -83,13 +90,16 @@ class OpenLoadDialog(QDialog):
 
     def save_values(self):
         self.settings_loader.write(
-            SavedValuesConstants.LoaderDialog.REPLACE_IMAGE_PATH, self.replace_image_file_path()
+            SavedValuesConstants.LoaderDialog.REPLACE_IMAGE_PATH,
+            self.replace_image_file_path(),
         )
         self.settings_loader.write(
-            SavedValuesConstants.LoaderDialog.ORIGINAL_PICTURE_PATH, self.original_picture_file_path()
+            SavedValuesConstants.LoaderDialog.ORIGINAL_PICTURE_PATH,
+            self.original_picture_file_path(),
         )
         self.settings_loader.write(
-            SavedValuesConstants.LoaderDialog.ORGINAL_VIDEO_PATH, self.original_video_file_path()
+            SavedValuesConstants.LoaderDialog.ORGINAL_VIDEO_PATH,
+            self.original_video_file_path(),
         )
 
     def exec_(self):
