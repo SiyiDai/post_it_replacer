@@ -71,37 +71,45 @@ class MainWindow(QMainWindow):
         self.__refresh_post_it_color_line_edit()
 
     def show_replace_result(self):
-        replace_img = Image.open(self.replace_image_path)
+        # *****************************************************************************
+        # Image.open 按照RGB格式打开图片，但是opencv里面默认是BGR的格式
+        # 这里先利用Image.open打开图片，然后转化为opencv中的BGR格式，最后再转成Image库的格式
+        # 之所以使用Image库是因为它可以打开各种格式的图片，并且可以对图片进行resize
+        # *****************************************************************************
+        replace_img = self.__convert_rgb_to_bgr(self.replace_image_path)
+        replace_img = Image.fromarray(replace_img)
+
         dir_path = os.path.dirname(os.path.realpath(self.replace_image_path))
         pic_path = self.original_picture_path
         video_path = self.original_video_path
         result_path = dir_path + "/" + REPLACED_FILE_NAME
 
         if self.ui.radioButton_picture.isChecked:
-            self.show_replaced_picture(pic_path, replace_img)
+            self.show_result_picture(pic_path, replace_img)
 
         elif self.ui.radioButton_video.isChecked:
-            self.show_replaced_video(video_path, replace_img)
+            self.show_result_video(video_path, replace_img)
 
         elif self.ui.radioButton_camera.isChecked:
-            self.show_replace_camera_stream(replace_img)
+            self.show_result_camera_stream(replace_img)
 
         else:
             print("Unexpected Value of Mode")
 
         self.__refresh_replaced_result(result_path)
 
-    def show_replaced_picture(self, pic_path, replace_img):
+    def show_result_picture(self, pic_path, replace_img):
+        # *****************************************************************************
         # Picture, change the post-it part in pic
-        cap = cv2.VideoCapture(pic_path)
-        ret, frame = cap.read()
+        # 用Image.open可以打开PNG文件，opencv打开可能会出错
+        # 按照RGB格式打开，然后转换为opencv的BGR格式
+        # *****************************************************************************
+        frame = self.__convert_rgb_to_bgr(pic_path)
+
         replace_result = self.detect_and_replace(frame.copy(), replace_img)
         cv2.imwrite(REPLACED_FILE_NAME, replace_result)
-        # cv2.imshow('original', frame)
-        # cv2.imshow('mask', replace_result)
-        cap.release()
 
-    def show_replaced_video(self, video_path, replace_img):
+    def show_result_video(self, video_path, replace_img):
         # Video, change the post-it part in video
         cap = cv2.VideoCapture(video_path)
         while True:
@@ -119,7 +127,7 @@ class MainWindow(QMainWindow):
                 break
         cap.release()
 
-    def show_replace_camera_stream(self, replace_img):
+    def show_result_camera_stream(self, replace_img):
         # Camera, change the post-it part in the camera stream
         cap = cv2.VideoCapture(0)
         while True:
@@ -163,12 +171,18 @@ class MainWindow(QMainWindow):
         return frame
 
     @staticmethod
+    def __convert_rgb_to_bgr(rgb_img_path):
+        bgr_img = np.array(Image.open(rgb_img_path).convert("RGB"))
+        bgr_img = cv2.cvtColor(bgr_img, cv2.COLOR_RGB2BGR)
+        return bgr_img
+
+    @staticmethod
     def post_it_color():
         return SavedValuesConstants.SettingsColorPicker.CUSTOMIZED_COLOR_POST_IT
 
     def __update_post_it_color(self):
         rgb_value = SavedValuesConstants.SettingsColorPicker.CUSTOMIZED_COLOR_POST_IT
-        self.post_it_color_rgb_value = np.array([rgb_value.red(), rgb_value.green(), rgb_value.blue()])
+        self.post_it_color_rgb_value = np.array([rgb_value.blue(), rgb_value.green(), rgb_value.red()])
 
     def __refresh_ui(self):
         self.__update_post_it_color()
@@ -204,10 +218,10 @@ class MainWindow(QMainWindow):
 #     replace_img = './replace_img.jpg'
 #     img_name = './img.png'
 #     show_replace_result(replace_img=replace_img, mode=0, img_name=img_name)
-
+#
 #     # 视频模式 ： 待替换的视频
 #     # video_name = './video.mp4'
 #     # show_replace_result(replace_img=replace_img, mode=1, video_name=video_name)
-
+#
 #     # 摄像头模式 ：
 #     # show_replace_result(replace_img=replace_img, mode=2)
