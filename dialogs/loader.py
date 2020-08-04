@@ -8,9 +8,7 @@ class LoadingThread(QThread):
     done_signal = pyqtSignal()
     progress_signal = pyqtSignal(str, int)
 
-    def __init__(
-        self, replace_image_path, original_picture_path, original_video_path, **kwargs
-    ):
+    def __init__(self, replace_image_path, original_picture_path, original_video_path, **kwargs):
         QThread.__init__(self)
         # input data
         self.replace_image_path = replace_image_path

@@ -12,6 +12,7 @@ from dialogs.saved_values_paths import SavedValuesConstants
 from dialogs.loader import LoadingThread
 
 REPLACED_FILE_NAME = "savedImage.jpg"
+COLOR_RANGE = 20
 
 
 class MainWindow(QMainWindow):
@@ -27,10 +28,10 @@ class MainWindow(QMainWindow):
         self.ui.radioButton_picture.toggled.connect(self.__refresh_ui)
         self.ui.radioButton_video.toggled.connect(self.__refresh_ui)
         self.ui.actionLoader.triggered.connect(self.on_action_loader_triggered)
-        self.ui.pushButton_replace.clicked.connect(self.show_replace_result)
-        self.ui.post_it_color_pushButton.clicked.connect(
-            self.on_action_settings_color_picker_triggered
-        )
+        self.ui.pushButton_replace.pressed.connect(self.show_replace_result)
+        self.ui.post_it_color_pushButton.pressed.connect(self.on_action_settings_color_picker_triggered)
+
+        self.post_it_color_rgb_value = np.array([])
 
         self.replace_image_path = None
         self.original_picture_path = None
@@ -59,17 +60,14 @@ class MainWindow(QMainWindow):
         # self.loading_progress_dialog = QProgressDialog("loading...", None, 0, 100, parent=self)
         # self.loading_progress_dialog.exec_()
 
-    @staticmethod
-    def post_it_color():
-        return SavedValuesConstants.SettingsColorPicker.CUSTOMIZED_COLOR_POST_IT
-
     def on_action_settings_color_picker_triggered(self):
         title = "Choose the color of post-it"
         color = self.post_it_color()
-        color_pick = QColorDialog.getColor(
-            color, self, title, QColorDialog.ShowAlphaChannel
-        )
+        color_pick = QColorDialog.getColor(color, self, title, QColorDialog.ShowAlphaChannel)
+
         SavedValuesConstants.SettingsColorPicker.CUSTOMIZED_COLOR_POST_IT = color_pick
+
+        self.__update_post_it_color()
         self.__refresh_post_it_color_line_edit()
 
     def show_replace_result(self):
@@ -78,7 +76,6 @@ class MainWindow(QMainWindow):
         pic_path = self.original_picture_path
         video_path = self.original_video_path
         result_path = dir_path + "/" + REPLACED_FILE_NAME
-        print(result_path)
 
         if self.ui.radioButton_picture.isChecked:
             self.show_replaced_picture(pic_path, replace_img)
@@ -138,20 +135,15 @@ class MainWindow(QMainWindow):
         cap.release()
 
     def detect_and_replace(self, frame, replace_img):
-        # 视频中的黄色 ：
+        # lower = self.post_it_color_rgb_value - COLOR_RANGE
+        # upper = self.post_it_color_rgb_value + COLOR_RANGE
         lower = np.array([189, 161, 142])
         upper = np.array([229, 201, 184])
-
-        # 黑色钱包颜色范围 ：
-        # lower = np.array([25, 20, 22])
-        # upper = np.array([67, 62, 64])
 
         mask = cv2.inRange(frame, lowerb=lower, upperb=upper)
 
         # find contours
-        contours, hierarchy = cv2.findContours(
-            mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE
-        )
+        contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         try:
             # find biggest bounding box
@@ -167,16 +159,21 @@ class MainWindow(QMainWindow):
             # draw bounding box in captured image
             frame = cv2.rectangle(frame, rect[index][0], rect[index][1], (0, 0, 255), 2)
             temp_replace = np.array(replace_img.resize(rect[index][2]))
-            frame[
-                rect[index][0][1] : rect[index][1][1],
-                rect[index][0][0] : rect[index][1][0],
-                :,
-            ] = temp_replace
+            frame[rect[index][0][1] : rect[index][1][1], rect[index][0][0] : rect[index][1][0], :,] = temp_replace
         except:
             pass
         return frame
 
+    @staticmethod
+    def post_it_color():
+        return SavedValuesConstants.SettingsColorPicker.CUSTOMIZED_COLOR_POST_IT
+
+    def __update_post_it_color(self):
+        rgb_value = SavedValuesConstants.SettingsColorPicker.CUSTOMIZED_COLOR_POST_IT
+        self.post_it_color_rgb_value = np.array([rgb_value.red(), rgb_value.green(), rgb_value.blue()])
+
     def __refresh_ui(self):
+        self.__update_post_it_color()
         self.__refresh_replace_image(self.replace_image_path)
         self.__refresh_original_picture(self.original_picture_path)
         # self.__refresh_original_video(self.original_video_path)

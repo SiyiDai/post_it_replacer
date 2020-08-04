@@ -6,10 +6,7 @@ SPECIAL_SAVER_SEPARATOR = " - "
 
 class SettingsLoaderAndSaver:
     def __init__(
-        self,
-        name,
-        organization=SavedValuesConstants.ORGANIZATION,
-        application=SavedValuesConstants.APPLICATION,
+        self, name, organization=SavedValuesConstants.ORGANIZATION, application=SavedValuesConstants.APPLICATION,
     ):
         self.organization = organization
         self.application = application

@@ -13,9 +13,7 @@ class Ui_LoadDialog(object):
     def setupUi(self, LoadDialog):
         LoadDialog.setObjectName("LoadDialog")
         LoadDialog.resize(712, 157)
-        sizePolicy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred
-        )
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(LoadDialog.sizePolicy().hasHeightForWidth())
@@ -24,9 +22,7 @@ class Ui_LoadDialog(object):
         self.gridLayout_2.setObjectName("gridLayout_2")
         self.buttonBox = QtWidgets.QDialogButtonBox(LoadDialog)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(
-            QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Ok
-        )
+        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Ok)
         self.buttonBox.setObjectName("buttonBox")
         self.gridLayout_2.addWidget(self.buttonBox, 1, 0, 1, 1)
         self.verticalLayout = QtWidgets.QVBoxLayout()
@@ -44,9 +40,7 @@ class Ui_LoadDialog(object):
         self.replace_image_line_edit.setObjectName("replace_image_line_edit")
         self.gridLayout.addWidget(self.replace_image_line_edit, 0, 1, 1, 1)
         self.select_original_picture_button = QtWidgets.QPushButton(LoadDialog)
-        self.select_original_picture_button.setObjectName(
-            "select_original_picture_button"
-        )
+        self.select_original_picture_button.setObjectName("select_original_picture_button")
         self.gridLayout.addWidget(self.select_original_picture_button, 2, 2, 1, 1)
         self.label_2 = QtWidgets.QLabel(LoadDialog)
         self.label_2.setObjectName("label_2")
