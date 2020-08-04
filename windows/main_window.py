@@ -135,10 +135,8 @@ class MainWindow(QMainWindow):
         cap.release()
 
     def detect_and_replace(self, frame, replace_img):
-        # lower = self.post_it_color_rgb_value - COLOR_RANGE
-        # upper = self.post_it_color_rgb_value + COLOR_RANGE
-        lower = np.array([189, 161, 142])
-        upper = np.array([229, 201, 184])
+        lower = self.post_it_color_rgb_value - COLOR_RANGE
+        upper = self.post_it_color_rgb_value + COLOR_RANGE
 
         mask = cv2.inRange(frame, lowerb=lower, upperb=upper)
 
