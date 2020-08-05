@@ -9,7 +9,6 @@ from PIL import Image
 from ui_py.ui_mainwindow import Ui_MainWindow
 from dialogs.open_load_dialog import OpenLoadDialog
 from dialogs.saved_values_paths import SavedValuesConstants
-from dialogs.loader import LoadingThread
 
 REPLACED_FILE_NAME = "savedImage.jpg"
 COLOR_RANGE = 20
@@ -48,17 +47,7 @@ class MainWindow(QMainWindow):
         self.original_picture_path = dialog.original_picture_file_path()
         self.original_video_path = dialog.original_video_file_path()
 
-        self.load_labelled_sequence_thread = LoadingThread(
-            replace_image_path=self.replace_image_path,
-            original_picture_path=self.original_picture_path,
-            original_video_path=self.original_video_path,
-        )
-
-        self.load_labelled_sequence_thread.start()
         self.__refresh_ui()
-
-        # self.loading_progress_dialog = QProgressDialog("loading...", None, 0, 100, parent=self)
-        # self.loading_progress_dialog.exec_()
 
     def on_action_settings_color_picker_triggered(self):
         title = "Choose the color of post-it"
@@ -76,6 +65,8 @@ class MainWindow(QMainWindow):
         # 这里先利用Image.open打开图片，然后转化为opencv中的BGR格式，最后再转成Image库的格式
         # 之所以使用Image库是因为它可以打开各种格式的图片，并且可以对图片进行resize
         # *****************************************************************************
+        assert self.replace_image_path is not None
+
         replace_img = self.__convert_rgb_to_bgr(self.replace_image_path)
         replace_img = Image.fromarray(replace_img)
 
@@ -84,17 +75,16 @@ class MainWindow(QMainWindow):
         video_path = self.original_video_path
         result_path = dir_path + "/" + REPLACED_FILE_NAME
 
-        if self.ui.radioButton_picture.isChecked:
+        if self.ui.radioButton_picture.isChecked():
+            assert pic_path is not None
             self.show_result_picture(pic_path, replace_img)
 
-        elif self.ui.radioButton_video.isChecked:
+        if self.ui.radioButton_video.isChecked():
+            assert video_path is not None
             self.show_result_video(video_path, replace_img)
 
-        elif self.ui.radioButton_camera.isChecked:
+        if self.ui.radioButton_camera.isChecked():
             self.show_result_camera_stream(replace_img)
-
-        else:
-            print("Unexpected Value of Mode")
 
         self.__refresh_replaced_result(result_path)
 
@@ -114,17 +104,17 @@ class MainWindow(QMainWindow):
         cap = cv2.VideoCapture(video_path)
         while True:
             ret, frame = cap.read()
-            if frame is not None:
-                replace_result = self.detect_and_replace(frame.copy(), replace_img)
+            # if frame is not None:
+            replace_result = self.detect_and_replace(frame.copy(), replace_img)
 
-                cv2.imshow("original", frame)
-                cv2.imshow("mask", replace_result)
+            cv2.imshow("original", frame)
+            cv2.imshow("mask", replace_result)
 
-                # press 'ESC' to quit
-                if cv2.waitKey(100) & 0xFF == 0x1B:
-                    break
-            else:
+            # press 'ESC' to quit
+            if cv2.waitKey(100) & 0xFF == 0x1B:
                 break
+            # else:
+            #     break
         cap.release()
 
     def show_result_camera_stream(self, replace_img):
@@ -211,17 +201,3 @@ class MainWindow(QMainWindow):
             "QLineEdit { background-color: %s}"
             % SavedValuesConstants.SettingsColorPicker.CUSTOMIZED_COLOR_POST_IT.name()
         )
-
-
-# if __name__ == '__main__':
-#     # replace image
-#     replace_img = './replace_img.jpg'
-#     img_name = './img.png'
-#     show_replace_result(replace_img=replace_img, mode=0, img_name=img_name)
-#
-#     # 视频模式 ： 待替换的视频
-#     # video_name = './video.mp4'
-#     # show_replace_result(replace_img=replace_img, mode=1, video_name=video_name)
-#
-#     # 摄像头模式 ：
-#     # show_replace_result(replace_img=replace_img, mode=2)
