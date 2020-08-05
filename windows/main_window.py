@@ -1,4 +1,4 @@
-from PyQt5.QtCore import Qt, QItemSelectionModel
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QColor
 from PyQt5.QtWidgets import QMainWindow, QColorDialog
 import os
@@ -51,7 +51,7 @@ class MainWindow(QMainWindow):
 
     def on_action_settings_color_picker_triggered(self):
         title = "Choose the color of post-it"
-        color = self.post_it_color()
+        color = self.__post_it_color()
         color_pick = QColorDialog.getColor(color, self, title, QColorDialog.ShowAlphaChannel)
 
         SavedValuesConstants.SettingsColorPicker.CUSTOMIZED_COLOR_POST_IT = color_pick
@@ -60,11 +60,6 @@ class MainWindow(QMainWindow):
         self.__refresh_post_it_color_line_edit()
 
     def show_replace_result(self):
-        # *****************************************************************************
-        # Image.open 按照RGB格式打开图片，但是opencv里面默认是BGR的格式
-        # 这里先利用Image.open打开图片，然后转化为opencv中的BGR格式，最后再转成Image库的格式
-        # 之所以使用Image库是因为它可以打开各种格式的图片，并且可以对图片进行resize
-        # *****************************************************************************
         assert self.replace_image_path is not None
 
         replace_img = self.__convert_rgb_to_bgr(self.replace_image_path)
@@ -89,11 +84,7 @@ class MainWindow(QMainWindow):
         self.__refresh_replaced_result(result_path)
 
     def show_result_picture(self, pic_path, replace_img):
-        # *****************************************************************************
         # Picture, change the post-it part in pic
-        # 用Image.open可以打开PNG文件，opencv打开可能会出错
-        # 按照RGB格式打开，然后转换为opencv的BGR格式
-        # *****************************************************************************
         frame = self.__convert_rgb_to_bgr(pic_path)
 
         replace_result = self.detect_and_replace(frame.copy(), replace_img)
@@ -104,17 +95,17 @@ class MainWindow(QMainWindow):
         cap = cv2.VideoCapture(video_path)
         while True:
             ret, frame = cap.read()
-            # if frame is not None:
-            replace_result = self.detect_and_replace(frame.copy(), replace_img)
+            if frame is not None:
+                replace_result = self.detect_and_replace(frame.copy(), replace_img)
 
-            cv2.imshow("original", frame)
-            cv2.imshow("mask", replace_result)
+                cv2.imshow("original", frame)
+                cv2.imshow("mask", replace_result)
 
-            # press 'ESC' to quit
-            if cv2.waitKey(100) & 0xFF == 0x1B:
+                # press 'ESC' to quit
+                if cv2.waitKey(100) & 0xFF == 0x1B:
+                    break
+            else:
                 break
-            # else:
-            #     break
         cap.release()
 
     def show_result_camera_stream(self, replace_img):
@@ -133,14 +124,7 @@ class MainWindow(QMainWindow):
         cap.release()
 
     def detect_and_replace(self, frame, replace_img):
-        lower = self.post_it_color_rgb_value - COLOR_RANGE
-        upper = self.post_it_color_rgb_value + COLOR_RANGE
-
-        mask = cv2.inRange(frame, lowerb=lower, upperb=upper)
-
-        # find contours
-        contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
+        contours, hierarchy = self.find_contours(frame)
         try:
             # find biggest bounding box
             biggest, index = 0, 0
@@ -160,14 +144,25 @@ class MainWindow(QMainWindow):
             pass
         return frame
 
+    def set_mask(self, frame):
+        lower = self.post_it_color_rgb_value - COLOR_RANGE
+        upper = self.post_it_color_rgb_value + COLOR_RANGE
+        return cv2.inRange(frame, lowerb=lower, upperb=upper)
+
+    def find_contours(self, frame):
+        mask = self.set_mask(frame)
+        return cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
     @staticmethod
     def __convert_rgb_to_bgr(rgb_img_path):
+        # open image with Image.open to avoid error from opencv
+        # convert rgb image to bgr for opencv
         bgr_img = np.array(Image.open(rgb_img_path).convert("RGB"))
         bgr_img = cv2.cvtColor(bgr_img, cv2.COLOR_RGB2BGR)
         return bgr_img
 
     @staticmethod
-    def post_it_color():
+    def __post_it_color():
         return SavedValuesConstants.SettingsColorPicker.CUSTOMIZED_COLOR_POST_IT
 
     def __update_post_it_color(self):
