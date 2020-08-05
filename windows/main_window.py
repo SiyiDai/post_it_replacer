@@ -51,37 +51,36 @@ class MainWindow(QMainWindow):
 
     def on_action_settings_color_picker_triggered(self):
         title = "Choose the color of post-it"
-        color = self.__post_it_color()
+        color = SavedValuesConstants.SettingsColorPicker.CUSTOMIZED_COLOR_POST_IT
         color_pick = QColorDialog.getColor(color, self, title, QColorDialog.ShowAlphaChannel)
 
-        SavedValuesConstants.SettingsColorPicker.CUSTOMIZED_COLOR_POST_IT = color_pick
-
+        self.__store_post_it_color(color_pick)
         self.__update_post_it_color()
         self.__refresh_post_it_color_line_edit()
 
     def show_replace_result(self):
-        assert self.replace_image_path is not None
+        dir_path = os.path.dirname(os.path.realpath(self.replace_image_path))
+        result_path = dir_path + "/" + REPLACED_FILE_NAME
 
+        self.select_mode()
+        self.__refresh_replaced_result(result_path)
+
+    def select_mode(self):
+        assert self.replace_image_path is not None
         replace_img = self.__convert_rgb_to_bgr(self.replace_image_path)
         replace_img = Image.fromarray(replace_img)
 
-        dir_path = os.path.dirname(os.path.realpath(self.replace_image_path))
-        pic_path = self.original_picture_path
-        video_path = self.original_video_path
-        result_path = dir_path + "/" + REPLACED_FILE_NAME
-
+        # check which radiobutton has been selected
         if self.ui.radioButton_picture.isChecked():
-            assert pic_path is not None
-            self.show_result_picture(pic_path, replace_img)
+            assert self.original_picture_path is not None
+            self.show_result_picture(self.original_picture_path, replace_img)
 
         if self.ui.radioButton_video.isChecked():
-            assert video_path is not None
-            self.show_result_video(video_path, replace_img)
+            assert self.original_video_path is not None
+            self.show_result_video(self.original_video_path, replace_img)
 
         if self.ui.radioButton_camera.isChecked():
             self.show_result_camera_stream(replace_img)
-
-        self.__refresh_replaced_result(result_path)
 
     def show_result_picture(self, pic_path, replace_img):
         # Picture, change the post-it part in pic
@@ -162,8 +161,8 @@ class MainWindow(QMainWindow):
         return bgr_img
 
     @staticmethod
-    def __post_it_color():
-        return SavedValuesConstants.SettingsColorPicker.CUSTOMIZED_COLOR_POST_IT
+    def __store_post_it_color(color_pick):
+        SavedValuesConstants.SettingsColorPicker.CUSTOMIZED_COLOR_POST_IT = color_pick
 
     def __update_post_it_color(self):
         rgb_value = SavedValuesConstants.SettingsColorPicker.CUSTOMIZED_COLOR_POST_IT
