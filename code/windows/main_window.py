@@ -1,5 +1,5 @@
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap, QColor
+from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtGui import QPixmap, QColor, QImage
 from PyQt5.QtWidgets import QMainWindow, QColorDialog
 import os
 import cv2
@@ -37,6 +37,7 @@ class MainWindow(QMainWindow):
         self.original_video_path = None
 
         self.__refresh_post_it_color_line_edit()
+        print(self.__dict__)
 
     def on_action_loader_triggered(self):
         dialog = OpenLoadDialog()
@@ -77,10 +78,19 @@ class MainWindow(QMainWindow):
 
         if self.ui.radioButton_video.isChecked():
             assert self.original_video_path is not None
-            self.show_result_video(self.original_video_path, replace_img)
+            self.cap = cv2.VideoCapture(self.original_video_path)
+            self.replace_img = replace_img
+            self.timer_video = QTimer(self)
+            self.timer_video.timeout.connect(self.show_result_video)
+            self.timer_video.start(50)
 
         if self.ui.radioButton_camera.isChecked():
-            self.show_result_camera_stream(replace_img)
+            # self.show_result_camera_stream(replace_img)
+            self.cap = cv2.VideoCapture(0)
+            self.replace_img = replace_img
+            self.timer_camera = QTimer(self)
+            self.timer_camera.timeout.connect(self.show_result_camera_stream)
+            self.timer_camera.start(5)
 
     def show_result_picture(self, pic_path, replace_img):
         # Picture, change the post-it part in pic
@@ -89,38 +99,70 @@ class MainWindow(QMainWindow):
         replace_result = self.detect_and_replace(frame.copy(), replace_img)
         cv2.imwrite(REPLACED_FILE_NAME, replace_result)
 
-    def show_result_video(self, video_path, replace_img):
+    def show_result_video(self):
+        replace_img = self.replace_img
+        # video_path = self.original_video_path
         # Video, change the post-it part in video
-        cap = cv2.VideoCapture(video_path)
-        while True:
-            ret, frame = cap.read()
-            if frame is not None:
-                replace_result = self.detect_and_replace(frame.copy(), replace_img)
-
-                cv2.imshow("original", frame)
-                cv2.imshow("mask", replace_result)
-
-                # press 'ESC' to quit
-                if cv2.waitKey(100) & 0xFF == 0x1B:
-                    break
-            else:
-                break
-        cap.release()
-
-    def show_result_camera_stream(self, replace_img):
-        # Camera, change the post-it part in the camera stream
-        cap = cv2.VideoCapture(0)
-        while True:
-            ret, frame = cap.read()
+        # while True:
+        ret, frame = self.cap.read()
+        if frame is not None:
             replace_result = self.detect_and_replace(frame.copy(), replace_img)
 
-            cv2.imshow("original", frame)
-            cv2.imshow("mask", replace_result)
+            replace_result = cv2.cvtColor(replace_result, cv2.COLOR_BGR2RGB)  # 将OpenCV图像流转为pyqt可以显示的图像流
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+            show_image = QImage(
+                replace_result.data, replace_result.shape[1], replace_result.shape[0], QImage.Format_RGB888
+            )
+            source_image = QImage(frame.data, frame.shape[1], frame.shape[0], QImage.Format_RGB888)
+            self.ui.replacement_result_label.setPixmap(QPixmap.fromImage(show_image))
+            self.ui.original_source_label.setPixmap(QPixmap.fromImage(source_image))
+            # cv2.imshow("original", frame)
+            # cv2.imshow("mask", replace_result)
 
             # press 'ESC' to quit
             if cv2.waitKey(100) & 0xFF == 0x1B:
-                break
-        cap.release()
+                return
+        else:
+            self.timer_video.stop()
+            return
+
+        # cap.release()
+
+    def show_result_camera_stream(self):
+        # Camera, change the post-it part in the camera stream
+        # cap = cv2.VideoCapture(0)
+        # while True:
+        #     ret, frame = cap.read()
+        #     replace_result = self.detect_and_replace(frame.copy(), replace_img)
+
+        #     cv2.imshow("original", frame)
+        #     cv2.imshow("mask", replace_result)
+
+        #     # press 'ESC' to quit
+        #     if cv2.waitKey(100) & 0xFF == 0x1B:
+        #         break
+        # cap.release()
+
+        replace_img = self.replace_img
+        ret, frame = self.cap.read()
+        if frame is not None:
+            replace_result = self.detect_and_replace(frame.copy(), replace_img)
+
+            replace_result = cv2.cvtColor(replace_result, cv2.COLOR_BGR2RGB)  # 将OpenCV图像流转为pyqt可以显示的图像流
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+            show_image = QImage(
+                replace_result.data, replace_result.shape[1], replace_result.shape[0], QImage.Format_RGB888
+            )
+            source_image = QImage(frame.data, frame.shape[1], frame.shape[0], QImage.Format_RGB888)
+            self.ui.replacement_result_label.setPixmap(QPixmap.fromImage(show_image))
+            self.ui.original_source_label.setPixmap(QPixmap.fromImage(source_image))
+            if cv2.waitKey(100) & 0xFF == 0x1B:
+                return
+        else:
+            self.timer_camera.stop()
+            return
 
     def detect_and_replace(self, frame, replace_img):
         contours, hierarchy = self.find_contours(frame)

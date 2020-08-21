@@ -210,6 +210,9 @@ class Ui_MainWindow(object):
         self.menuMain.addSeparator()
         self.menuMain.addAction(self.actionLoader)
         self.menubar.addAction(self.menuMain.menuAction())
+        self.replacement_result_label.setScaledContents(True)
+        self.original_source_label.setScaledContents(True)
+
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
