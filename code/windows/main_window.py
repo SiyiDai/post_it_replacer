@@ -37,7 +37,6 @@ class MainWindow(QMainWindow):
         self.original_video_path = None
 
         self.__refresh_post_it_color_line_edit()
-        print(self.__dict__)
 
     def on_action_loader_triggered(self):
         dialog = OpenLoadDialog()
@@ -60,37 +59,42 @@ class MainWindow(QMainWindow):
         self.__refresh_post_it_color_line_edit()
 
     def show_replace_result(self):
-        dir_path = os.path.dirname(os.path.realpath(self.replace_image_path))
-        result_path = dir_path + "/" + REPLACED_FILE_NAME
-
-        self.select_mode()
-        self.__refresh_replaced_result(result_path)
-
-    def select_mode(self):
         assert self.replace_image_path is not None
         replace_img = self.__convert_rgb_to_bgr(self.replace_image_path)
         replace_img = Image.fromarray(replace_img)
 
         # check which radiobutton has been selected
         if self.ui.radioButton_picture.isChecked():
-            assert self.original_picture_path is not None
-            self.show_result_picture(self.original_picture_path, replace_img)
-
+            self.ui.pushButton_pause.setEnabled(False)
+            self.on_picture_button_is_checked(replace_img)
         if self.ui.radioButton_video.isChecked():
-            assert self.original_video_path is not None
-            self.cap = cv2.VideoCapture(self.original_video_path)
-            self.replace_img = replace_img
-            self.timer_video = QTimer(self)
-            self.timer_video.timeout.connect(self.show_result_video)
-            self.timer_video.start(50)
-
+            self.ui.pushButton_pause.setEnabled(True)
+            self.on_video_button_is_checked(replace_img)
         if self.ui.radioButton_camera.isChecked():
-            # self.show_result_camera_stream(replace_img)
-            self.cap = cv2.VideoCapture(0)
-            self.replace_img = replace_img
-            self.timer_camera = QTimer(self)
-            self.timer_camera.timeout.connect(self.show_result_camera_stream)
-            self.timer_camera.start(5)
+            self.ui.pushButton_pause.setEnabled(False)
+            self.on_camera_button_is_checked(replace_img)
+
+    def on_picture_button_is_checked(self, replace_img):
+        assert self.original_picture_path is not None
+        self.show_result_picture(self.original_picture_path, replace_img)
+        dir_path = os.path.dirname(os.path.realpath(self.replace_image_path))
+        result_path = dir_path + "/" + REPLACED_FILE_NAME
+        self.__refresh_replaced_result(result_path)
+
+    def on_video_button_is_checked(self, replace_img):
+        assert self.original_video_path is not None
+        self.cap = cv2.VideoCapture(self.original_video_path)
+        self.replace_img = replace_img
+        self.timer_video = QTimer(self)
+        self.timer_video.timeout.connect(self.show_result_video)
+        self.timer_video.start(50)
+
+    def on_camera_button_is_checked(self, replace_img):
+        self.cap = cv2.VideoCapture(0)
+        self.replace_img = replace_img
+        self.timer_camera = QTimer(self)
+        self.timer_camera.timeout.connect(self.show_result_camera_stream)
+        self.timer_camera.start(5)
 
     def show_result_picture(self, pic_path, replace_img):
         # Picture, change the post-it part in pic
@@ -100,66 +104,41 @@ class MainWindow(QMainWindow):
         cv2.imwrite(REPLACED_FILE_NAME, replace_result)
 
     def show_result_video(self):
-        replace_img = self.replace_img
-        # video_path = self.original_video_path
         # Video, change the post-it part in video
-        # while True:
+        replace_img = self.replace_img
         ret, frame = self.cap.read()
+
         if frame is not None:
             replace_result = self.detect_and_replace(frame.copy(), replace_img)
 
-            replace_result = cv2.cvtColor(replace_result, cv2.COLOR_BGR2RGB)  # 将OpenCV图像流转为pyqt可以显示的图像流
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            replace_result = self.__convert_bgr_to_rgb(replace_result)
+            frame = self.__convert_bgr_to_rgb(frame)
 
-            show_image = QImage(
-                replace_result.data, replace_result.shape[1], replace_result.shape[0], QImage.Format_RGB888
-            )
-            source_image = QImage(frame.data, frame.shape[1], frame.shape[0], QImage.Format_RGB888)
-            self.ui.replacement_result_label.setPixmap(QPixmap.fromImage(show_image))
-            self.ui.original_source_label.setPixmap(QPixmap.fromImage(source_image))
-            # cv2.imshow("original", frame)
-            # cv2.imshow("mask", replace_result)
+            self.__refresh_original_video(frame)
+            self.__refresh_replaced_video(replace_result)
 
-            # press 'ESC' to quit
-            if cv2.waitKey(100) & 0xFF == 0x1B:
+            if self.ui.pushButton_pause.isChecked():
+                self.timer_video.stop()
                 return
+
         else:
             self.timer_video.stop()
             return
 
-        # cap.release()
-
     def show_result_camera_stream(self):
-        # Camera, change the post-it part in the camera stream
-        # cap = cv2.VideoCapture(0)
-        # while True:
-        #     ret, frame = cap.read()
-        #     replace_result = self.detect_and_replace(frame.copy(), replace_img)
-
-        #     cv2.imshow("original", frame)
-        #     cv2.imshow("mask", replace_result)
-
-        #     # press 'ESC' to quit
-        #     if cv2.waitKey(100) & 0xFF == 0x1B:
-        #         break
-        # cap.release()
-
+        # webcam, change the post-it part in camera stream
         replace_img = self.replace_img
         ret, frame = self.cap.read()
+
         if frame is not None:
             replace_result = self.detect_and_replace(frame.copy(), replace_img)
 
-            replace_result = cv2.cvtColor(replace_result, cv2.COLOR_BGR2RGB)  # 将OpenCV图像流转为pyqt可以显示的图像流
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            replace_result = self.__convert_bgr_to_rgb(replace_result)
+            frame = self.__convert_bgr_to_rgb(frame)
 
-            show_image = QImage(
-                replace_result.data, replace_result.shape[1], replace_result.shape[0], QImage.Format_RGB888
-            )
-            source_image = QImage(frame.data, frame.shape[1], frame.shape[0], QImage.Format_RGB888)
-            self.ui.replacement_result_label.setPixmap(QPixmap.fromImage(show_image))
-            self.ui.original_source_label.setPixmap(QPixmap.fromImage(source_image))
-            if cv2.waitKey(100) & 0xFF == 0x1B:
-                return
+            self.__refresh_original_video(frame)
+            self.__refresh_replaced_video(replace_result)
+
         else:
             self.timer_camera.stop()
             return
@@ -198,9 +177,12 @@ class MainWindow(QMainWindow):
     def __convert_rgb_to_bgr(rgb_img_path):
         # open image with Image.open to avoid error from opencv
         # convert rgb image to bgr for opencv
-        bgr_img = np.array(Image.open(rgb_img_path).convert("RGB"))
-        bgr_img = cv2.cvtColor(bgr_img, cv2.COLOR_RGB2BGR)
-        return bgr_img
+        rgb_img = np.array(Image.open(rgb_img_path).convert("RGB"))
+        return cv2.cvtColor(rgb_img, cv2.COLOR_RGB2BGR)
+
+    @staticmethod
+    def __convert_bgr_to_rgb(bgr_img):
+        return cv2.cvtColor(bgr_img, cv2.COLOR_BGR2RGB)
 
     @staticmethod
     def __store_post_it_color(color_pick):
@@ -214,7 +196,6 @@ class MainWindow(QMainWindow):
         self.__update_post_it_color()
         self.__refresh_replace_image(self.replace_image_path)
         self.__refresh_original_picture(self.original_picture_path)
-        # self.__refresh_original_video(self.original_video_path)
 
     def __refresh_replace_image(self, replace_image_path):
         pix_map = QPixmap(replace_image_path)
@@ -224,13 +205,19 @@ class MainWindow(QMainWindow):
         pix_map = QPixmap(original_picture_path)
         self.ui.original_source_label.setPixmap(pix_map)
 
-    def __refresh_original_video(self, original_video_path):
-        pix_map = QPixmap(original_video_path)
-        self.ui.original_source_label.setPixmap(pix_map)
-
     def __refresh_replaced_result(self, replaced_result_path):
         pix_map = QPixmap(replaced_result_path)
         self.ui.replacement_result_label.setPixmap(pix_map)
+
+    def __refresh_original_video(self, frame):
+        source_image = QImage(frame.data, frame.shape[1], frame.shape[0], QImage.Format_RGB888)
+        self.ui.original_source_label.setPixmap(QPixmap.fromImage(source_image))
+
+    def __refresh_replaced_video(self, replace_result):
+        show_image = QImage(
+                replace_result.data, replace_result.shape[1], replace_result.shape[0], QImage.Format_RGB888
+            )
+        self.ui.replacement_result_label.setPixmap(QPixmap.fromImage(show_image))
 
     def __refresh_post_it_color_line_edit(self):
         self.ui.post_it_lineEdit.setStyleSheet(

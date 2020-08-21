@@ -8,14 +8,11 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(904, 629)
-        sizePolicy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
-        )
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
@@ -84,15 +81,39 @@ class Ui_MainWindow(object):
         self.verticalLayout_5.addWidget(self.original_source_groupbox)
         self.gridLayout_10.addLayout(self.verticalLayout_5, 0, 1, 1, 1)
         self.replacement_result_groupbox = QtWidgets.QGroupBox(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.replacement_result_groupbox.sizePolicy().hasHeightForWidth())
+        self.replacement_result_groupbox.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setBold(True)
         font.setUnderline(True)
         font.setWeight(75)
         self.replacement_result_groupbox.setFont(font)
-        self.replacement_result_groupbox.setAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
+        self.replacement_result_groupbox.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
         self.replacement_result_groupbox.setObjectName("replacement_result_groupbox")
         self.gridLayout_8 = QtWidgets.QGridLayout(self.replacement_result_groupbox)
         self.gridLayout_8.setObjectName("gridLayout_8")
+        self.pushButton_pause = QtWidgets.QPushButton(self.replacement_result_groupbox)
+        font = QtGui.QFont()
+        font.setBold(False)
+        font.setUnderline(False)
+        font.setWeight(50)
+        font.setKerning(False)
+        self.pushButton_pause.setFont(font)
+        self.pushButton_pause.setCheckable(True)
+        self.pushButton_pause.setObjectName("pushButton_pause")
+        self.gridLayout_8.addWidget(self.pushButton_pause, 2, 0, 1, 1)
+        self.pushButton_replace = QtWidgets.QPushButton(self.replacement_result_groupbox)
+        font = QtGui.QFont()
+        font.setBold(False)
+        font.setUnderline(False)
+        font.setWeight(50)
+        self.pushButton_replace.setFont(font)
+        self.pushButton_replace.setCheckable(False)
+        self.pushButton_replace.setObjectName("pushButton_replace")
+        self.gridLayout_8.addWidget(self.pushButton_replace, 1, 0, 1, 1)
         self.verticalLayout_7 = QtWidgets.QVBoxLayout()
         self.verticalLayout_7.setObjectName("verticalLayout_7")
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
@@ -127,14 +148,6 @@ class Ui_MainWindow(object):
         self.radioButton_camera.setFont(font)
         self.radioButton_camera.setObjectName("radioButton_camera")
         self.horizontalLayout_2.addWidget(self.radioButton_camera)
-        self.pushButton_replace = QtWidgets.QPushButton(self.replacement_result_groupbox)
-        font = QtGui.QFont()
-        font.setBold(False)
-        font.setUnderline(False)
-        font.setWeight(50)
-        self.pushButton_replace.setFont(font)
-        self.pushButton_replace.setObjectName("pushButton_replace")
-        self.horizontalLayout_2.addWidget(self.pushButton_replace)
         self.verticalLayout_7.addLayout(self.horizontalLayout_2)
         self.gridLayout_9 = QtWidgets.QGridLayout()
         self.gridLayout_9.setObjectName("gridLayout_9")
@@ -146,6 +159,7 @@ class Ui_MainWindow(object):
         self.replacement_result_label.setSizePolicy(sizePolicy)
         self.replacement_result_label.setMinimumSize(QtCore.QSize(400, 240))
         self.replacement_result_label.setText("")
+        self.replacement_result_label.setScaledContents(True)
         self.replacement_result_label.setObjectName("replacement_result_label")
         self.gridLayout_9.addWidget(self.replacement_result_label, 3, 0, 1, 1)
         self.horizontalLayout_4 = QtWidgets.QHBoxLayout()
@@ -190,10 +204,8 @@ class Ui_MainWindow(object):
         self.gridLayout_9.addLayout(self.horizontalLayout_4, 4, 0, 1, 1)
         self.verticalLayout_7.addLayout(self.gridLayout_9)
         self.gridLayout_8.addLayout(self.verticalLayout_7, 0, 0, 1, 1)
-        spacerItem1 = QtWidgets.QSpacerItem(
-            20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.MinimumExpanding,
-        )
-        self.gridLayout_8.addItem(spacerItem1, 1, 0, 1, 1)
+        spacerItem1 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.MinimumExpanding)
+        self.gridLayout_8.addItem(spacerItem1, 3, 0, 1, 1)
         self.gridLayout_10.addWidget(self.replacement_result_groupbox, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
@@ -210,9 +222,6 @@ class Ui_MainWindow(object):
         self.menuMain.addSeparator()
         self.menuMain.addAction(self.actionLoader)
         self.menubar.addAction(self.menuMain.menuAction())
-        self.replacement_result_label.setScaledContents(True)
-        self.original_source_label.setScaledContents(True)
-
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -223,10 +232,11 @@ class Ui_MainWindow(object):
         self.replace_image_groupbox.setTitle(_translate("MainWindow", "Replace Image"))
         self.original_source_groupbox.setTitle(_translate("MainWindow", "Original Source"))
         self.replacement_result_groupbox.setTitle(_translate("MainWindow", "Replacement Result"))
+        self.pushButton_pause.setText(_translate("MainWindow", "Pause"))
+        self.pushButton_replace.setText(_translate("MainWindow", "Replace"))
         self.radioButton_picture.setText(_translate("MainWindow", "Picture"))
         self.radioButton_video.setText(_translate("MainWindow", "Video"))
         self.radioButton_camera.setText(_translate("MainWindow", "Camera"))
-        self.pushButton_replace.setText(_translate("MainWindow", "Replace"))
         self.post_it_color_label.setText(_translate("MainWindow", "Post-it Color:"))
         self.post_it_color_pushButton.setText(_translate("MainWindow", "Select"))
         self.menuMain.setTitle(_translate("MainWindow", "File"))
@@ -235,10 +245,10 @@ class Ui_MainWindow(object):
 
 if __name__ == "__main__":
     import sys
-
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
+
