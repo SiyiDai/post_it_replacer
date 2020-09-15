@@ -157,16 +157,16 @@ class MainWindow(QMainWindow):
                     index = i
 
             # draw bounding box in captured image
-            # height = rect[index][1][1]- rect[index][0][1]
-            # width = rect[index][1][0] - rect[index][0][0]
-            # trans_pt1 = (int(rect[index][0][0]+width/4), int(rect[index][0][1]+height/4))
-            # trans_pt2 = (int(rect[index][1][0]-width/4), int(rect[index][1][1]-height/4))
-            frame = cv2.rectangle(frame, rect[index][0], rect[index][1], (0, 0, 255), 2)
-            # frame = cv2.rectangle(frame, trans_pt1, trans_pt2, (0, 0, 255), 2)
+            height = rect[index][1][1]- rect[index][0][1]
+            width = rect[index][1][0] - rect[index][0][0]
+            trans_pt1 = (int(rect[index][0][0]+width/4), int(rect[index][0][1]+height/4))
+            trans_pt2 = (int(rect[index][1][0]-width/4), int(rect[index][1][1]-height/4))
+            # frame = cv2.rectangle(frame, rect[index][0], rect[index][1], (0, 0, 255), 2)
+            frame = cv2.rectangle(frame, trans_pt1, trans_pt2, (0, 0, 255), 2)
             # temp_replace = np.array(replace_img.resize(width, height))
             temp_replace = np.array(replace_img.resize(rect[index][2]))
-            frame[rect[index][0][1] : rect[index][1][1], rect[index][0][0] : rect[index][1][0], :,] = temp_replace
-            # frame[trans_pt1[1] : trans_pt2[1], trans_pt1[0] : trans_pt2[0], :,] = temp_replace
+            # frame[rect[index][0][1] : rect[index][1][1], rect[index][0][0] : rect[index][1][0], :,] = temp_replace
+            frame[trans_pt1[1] : trans_pt2[1], trans_pt1[0] : trans_pt2[0], :,] = temp_replace
             # frame[int(rect[index][0][1]+height/4) : int(rect[index][1][1]-height/4), int(rect[index][0][0]+width/4) : int(rect[index][1][0]-width/4), :,] = temp_replace
         except:
             pass
