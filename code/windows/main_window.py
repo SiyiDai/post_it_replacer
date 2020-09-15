@@ -76,10 +76,8 @@ class MainWindow(QMainWindow):
 
     def on_picture_button_is_checked(self, replace_img):
         assert self.original_picture_path is not None
-        self.show_result_picture(self.original_picture_path, replace_img)
-        dir_path = os.path.dirname(os.path.realpath(self.replace_image_path))
-        result_path = dir_path + "/" + REPLACED_FILE_NAME
-        self.__refresh_replaced_result(result_path)
+        self.replace_frame = self.show_result_picture(self.original_picture_path, replace_img)
+        self.__refresh_replaced_result(self.replace_frame)
 
     def on_video_button_is_checked(self, replace_img):
         assert self.original_video_path is not None
@@ -99,9 +97,8 @@ class MainWindow(QMainWindow):
     def show_result_picture(self, pic_path, replace_img):
         # Picture, change the post-it part in pic
         frame = self.__convert_rgb_to_bgr(pic_path)
-
         replace_result = self.detect_and_replace(frame.copy(), replace_img)
-        cv2.imwrite(REPLACED_FILE_NAME, replace_result)
+        return replace_result
 
     def show_result_video(self):
         # Video, change the post-it part in video
@@ -161,13 +158,11 @@ class MainWindow(QMainWindow):
             width = rect[index][1][0] - rect[index][0][0]
             trans_pt1 = (int(rect[index][0][0]+width/4), int(rect[index][0][1]+height/4))
             trans_pt2 = (int(rect[index][1][0]-width/4), int(rect[index][1][1]-height/4))
-            # frame = cv2.rectangle(frame, rect[index][0], rect[index][1], (0, 0, 255), 2)
+
             frame = cv2.rectangle(frame, trans_pt1, trans_pt2, (0, 0, 255), 2)
-            # temp_replace = np.array(replace_img.resize(width, height))
-            temp_replace = np.array(replace_img.resize(rect[index][2]))
-            # frame[rect[index][0][1] : rect[index][1][1], rect[index][0][0] : rect[index][1][0], :,] = temp_replace
-            frame[trans_pt1[1] : trans_pt2[1], trans_pt1[0] : trans_pt2[0], :,] = temp_replace
-            # frame[int(rect[index][0][1]+height/4) : int(rect[index][1][1]-height/4), int(rect[index][0][0]+width/4) : int(rect[index][1][0]-width/4), :,] = temp_replace
+            temp_replace = np.array(replace_img.resize((int(trans_pt2[0]-trans_pt1[0]),int(trans_pt2[1]-trans_pt1[1]))))
+            frame[trans_pt1[1] : trans_pt2[1], trans_pt1[0] : trans_pt2[0]] = temp_replace
+
         except:
             pass
         return frame
@@ -213,9 +208,10 @@ class MainWindow(QMainWindow):
         pix_map = QPixmap(original_picture_path)
         self.ui.original_source_label.setPixmap(pix_map)
 
-    def __refresh_replaced_result(self, replaced_result_path):
-        pix_map = QPixmap(replaced_result_path)
-        self.ui.replacement_result_label.setPixmap(pix_map)
+    def __refresh_replaced_result(self, frame):
+        frame = self.__convert_bgr_to_rgb(frame)
+        source_image = QImage(frame.data, frame.shape[1], frame.shape[0], QImage.Format_RGB888)
+        self.ui.replacement_result_label.setPixmap(QPixmap.fromImage(source_image))
 
     def __refresh_original_video(self, frame):
         source_image = QImage(frame.data, frame.shape[1], frame.shape[0], QImage.Format_RGB888)
