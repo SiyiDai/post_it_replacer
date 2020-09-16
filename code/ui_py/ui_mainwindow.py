@@ -8,11 +8,14 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(904, 629)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
@@ -91,7 +94,7 @@ class Ui_MainWindow(object):
         font.setUnderline(True)
         font.setWeight(75)
         self.replacement_result_groupbox.setFont(font)
-        self.replacement_result_groupbox.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
+        self.replacement_result_groupbox.setAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
         self.replacement_result_groupbox.setObjectName("replacement_result_groupbox")
         self.gridLayout_8 = QtWidgets.QGridLayout(self.replacement_result_groupbox)
         self.gridLayout_8.setObjectName("gridLayout_8")
@@ -204,7 +207,9 @@ class Ui_MainWindow(object):
         self.gridLayout_9.addLayout(self.horizontalLayout_4, 4, 0, 1, 1)
         self.verticalLayout_7.addLayout(self.gridLayout_9)
         self.gridLayout_8.addLayout(self.verticalLayout_7, 0, 0, 1, 1)
-        spacerItem1 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.MinimumExpanding)
+        spacerItem1 = QtWidgets.QSpacerItem(
+            20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.MinimumExpanding
+        )
         self.gridLayout_8.addItem(spacerItem1, 3, 0, 1, 1)
         self.gridLayout_10.addWidget(self.replacement_result_groupbox, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
@@ -245,10 +250,10 @@ class Ui_MainWindow(object):
 
 if __name__ == "__main__":
     import sys
+
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
-

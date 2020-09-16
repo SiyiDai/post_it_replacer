@@ -154,13 +154,15 @@ class MainWindow(QMainWindow):
                     index = i
 
             # draw bounding box in captured image
-            height = rect[index][1][1]- rect[index][0][1]
+            height = rect[index][1][1] - rect[index][0][1]
             width = rect[index][1][0] - rect[index][0][0]
-            trans_pt1 = (int(rect[index][0][0]+width/4), int(rect[index][0][1]+height/4))
-            trans_pt2 = (int(rect[index][1][0]-width/4), int(rect[index][1][1]-height/4))
+            trans_pt1 = (int(rect[index][0][0] + width / 4), int(rect[index][0][1] + height / 4))
+            trans_pt2 = (int(rect[index][1][0] - width / 4), int(rect[index][1][1] - height / 4))
 
-            frame = cv2.rectangle(frame, trans_pt1, trans_pt2, (0, 0, 255), 2)
-            temp_replace = np.array(replace_img.resize((int(trans_pt2[0]-trans_pt1[0]),int(trans_pt2[1]-trans_pt1[1]))))
+            # frame = cv2.rectangle(frame, trans_pt1, trans_pt2, (0, 0, 255), 2)
+            temp_replace = np.array(
+                replace_img.resize((int(trans_pt2[0] - trans_pt1[0]), int(trans_pt2[1] - trans_pt1[1])))
+            )
             frame[trans_pt1[1] : trans_pt2[1], trans_pt1[0] : trans_pt2[0]] = temp_replace
 
         except:
@@ -218,9 +220,7 @@ class MainWindow(QMainWindow):
         self.ui.original_source_label.setPixmap(QPixmap.fromImage(source_image))
 
     def __refresh_replaced_video(self, replace_result):
-        show_image = QImage(
-                replace_result.data, replace_result.shape[1], replace_result.shape[0], QImage.Format_RGB888
-            )
+        show_image = QImage(replace_result.data, replace_result.shape[1], replace_result.shape[0], QImage.Format_RGB888)
         self.ui.replacement_result_label.setPixmap(QPixmap.fromImage(show_image))
 
     def __refresh_post_it_color_line_edit(self):

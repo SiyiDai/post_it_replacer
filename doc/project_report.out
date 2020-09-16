@@ -1,0 +1,13 @@
+\BOOKMARK [0][-]{chapter.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.1.1}{Definition of Tasks}{chapter.1}% 2
+\BOOKMARK [0][-]{chapter.2}{Environment Specification}{}% 3
+\BOOKMARK [1][-]{section.2.1}{Hardware Environment}{chapter.2}% 4
+\BOOKMARK [1][-]{section.2.2}{Software Environment}{chapter.2}% 5
+\BOOKMARK [0][-]{chapter.3}{Approach and Method}{}% 6
+\BOOKMARK [0][-]{chapter.4}{Post-it Replacer}{}% 7
+\BOOKMARK [1][-]{section.4.1}{Project Structure}{chapter.4}% 8
+\BOOKMARK [1][-]{section.4.2}{Dialogs}{chapter.4}% 9
+\BOOKMARK [2][-]{subsection.4.2.1}{Code}{section.4.2}% 10
+\BOOKMARK [1][-]{section.4.3}{Color Picker}{chapter.4}% 11
+\BOOKMARK [1][-]{section.4.4}{MainWindow}{chapter.4}% 12
+\BOOKMARK [2][-]{subsection.4.4.1}{Code}{section.4.4}% 13

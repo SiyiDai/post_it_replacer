@@ -1,3 +1,5 @@
+#post_it_replace.py
+
 from PyQt5.QtWidgets import QApplication
 from windows.main_window import MainWindow
 

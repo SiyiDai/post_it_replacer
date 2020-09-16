@@ -1,0 +1,25 @@
+\select@language {english}
+\contentsline {chapter}{\numberline {1}Introduction}{3}{chapter.1}
+\contentsline {section}{\numberline {1.1}Definition of Tasks}{3}{section.1.1}
+\contentsline {chapter}{\numberline {2}Environment Specification}{4}{chapter.2}
+\contentsline {section}{\numberline {2.1}Hardware Environment}{4}{section.2.1}
+\contentsline {section}{\numberline {2.2}Software Environment}{4}{section.2.2}
+\contentsline {paragraph}{Python 3.6.10 :: Anaconda, Inc.}{4}{paragraph*.2}
+\contentsline {paragraph}{Visual Studio Code}{4}{paragraph*.3}
+\contentsline {paragraph}{PyQt5}{4}{paragraph*.4}
+\contentsline {paragraph}{Qt Creator}{5}{paragraph*.5}
+\contentsline {paragraph}{OpenCV-Python}{5}{paragraph*.6}
+\contentsline {chapter}{\numberline {3}Approach and Method}{6}{chapter.3}
+\contentsline {paragraph}{Read}{6}{paragraph*.7}
+\contentsline {paragraph}{Mask}{6}{paragraph*.8}
+\contentsline {paragraph}{Determine the Boundary}{7}{paragraph*.9}
+\contentsline {paragraph}{Find the Biggest Bounding Box}{7}{paragraph*.10}
+\contentsline {paragraph}{Transform}{8}{paragraph*.11}
+\contentsline {paragraph}{Resize and Replace}{8}{paragraph*.12}
+\contentsline {chapter}{\numberline {4}Post-it Replacer}{9}{chapter.4}
+\contentsline {section}{\numberline {4.1}Project Structure}{9}{section.4.1}
+\contentsline {section}{\numberline {4.2}Dialogs}{10}{section.4.2}
+\contentsline {subsection}{\numberline {4.2.1}Code}{10}{subsection.4.2.1}
+\contentsline {section}{\numberline {4.3}Color Picker}{21}{section.4.3}
+\contentsline {section}{\numberline {4.4}MainWindow}{22}{section.4.4}
+\contentsline {subsection}{\numberline {4.4.1}Code}{23}{subsection.4.4.1}
